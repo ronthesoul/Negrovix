@@ -8,12 +8,29 @@
 
 
 function main(){
-    for index in nginx, "apache2-utils nginx-extras";  do
-    check_and_install $index
-}
+
+domain=" "
+dfile="index.html"
+
+
+    for index in nginx apache2-utils nginx-extras;  do
+    check_and_install "$index"
+done
+
 while getopts "d:s:f:u:c:a:" opt; do
     case $opt in
-        a)
+        d) domain="OPTARG" ;;
+        s)
+
+
+    esac
+
+ if [[ -z domain ]];
+ then
+     echo "Error -d (domain) is requied"
+     exit 1
+ fi
+
 }
 
 
