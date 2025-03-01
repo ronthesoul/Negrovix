@@ -8,26 +8,59 @@
 
 
 function main(){
-
+    
 domain=""
+confile_file="/etc/nginx/sites-available/$domain"
 dfile="index.html"
-proto=       " listen 80 default_server;                                                         listen [::]:80 default_server;"
+proto="listen 80 default_server;"
 ssl_cert=""
 ssl_key=""
-
+ssl_enabled=1
 
 
     for index in nginx apache2-utils nginx-extras;  do
     check_and_install "$index"
 done
 
-while getopts "d:s:f:u:c:a:" opt; do
+while getopts "d:s:f:u:c:a:h" opt; do
     case $opt in
-        d) domain="OPTARG" ;;
-        s)  ss
+        d) $domain="$OPTARG"
+           if [[ -z "$domain" ]];
+           then
+               echo "Syntax Error: -d <domain>"
+               exit 1
+           fi ;;
+        s)
+          if [["$OPTARG" != *:*]];
+          then
+              echo "Syntax Error: -s <certfile>:<keyfile>"
+              exit 1
+          fi
+           IFS=":" read -r ssl_cert ssl_key <<< "$OPTARG"
+           if [[ -z "$ssl_cert" || -z "$ssl_key" ]];
+           then 
+               echo "Syntax Error: -s <certfile>:<keyfile>" 
+               fi
+             $proto="listen 443 ssl"
+             $ssl_enabled=0 ;;
+
+         f) $dfile = $OPTARG
+             if [[ -z "$dfile" ]];
+             then
+                 echo "Syntax Error: -f <main html file>"
+                 exit 1
+             fi ;;
+
+
+
+           
 
 
     esac
+
+rootdir="/var/www/$domain"
+
+
 
  if [[ -z domain ]];
  then
