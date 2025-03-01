@@ -28,7 +28,7 @@ Run the script with the required options:
 | `-h` | Displays help information. |
 
 ### 📥 Installation
-Create an Nginx configuration for `example.com`:
+The first run would most likely install all the required packages. 
 ```bash
 curl -sSLo negrovix.sh https://raw.githubusercontent.com/ronthesoul/negrovix/refs/heads/main/negrovix.sh && chmod +x negrovix.sh
 ```
