@@ -140,7 +140,7 @@ ossl_cert=$4
 oroot_dir=$5
 oconfig_file=$6
 
-cat << 'EOF' > $oconfig_file
+cat << EOF > $oconfig_file
 server {
     listen 80;
     server_name $odomain;
@@ -172,7 +172,7 @@ ofile=$2
 oroot_dir=$3
 oconfig_file=$4
 
-cat << 'EOF' > $oconfig_file
+cat << EOF > $oconfig_file
 server {
         listen 80;
         listen [::]:80;
@@ -194,7 +194,7 @@ ouser_dir=$1
 ouser_root=$2
 oconfig_file=$3
 
-cat << 'EOF' >> $oconfig_file
+cat << EOF >> $oconfig_file
 
     location $ouser_root ^/~(.+?)(/.*)?$ {
     alias /home/\$1/$ouser_dir\$2;
@@ -246,7 +246,7 @@ if  ! htpasswd -b "$oh_file" "$oh_user" "$oh_password" ; then
 fi
 mkdir -p /var/www/"$oh_path"
 
-cat << 'EOF' >> $oh_config_file
+cat << EOF >> $oh_config_file
 location $oh_path{
     auth_basic "Restricted Area";
     auth_basic_user_file "$oh_file";
@@ -289,4 +289,4 @@ function restart_nginx() {
 
 
 
-main
+main "$@"
