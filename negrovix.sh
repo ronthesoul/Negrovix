@@ -9,8 +9,12 @@
 
 function main(){
 
-domain=" "
+domain=""
 dfile="index.html"
+proto=       " listen 80 default_server;                                                         listen [::]:80 default_server;"
+ssl_cert=""
+ssl_key=""
+
 
 
     for index in nginx apache2-utils nginx-extras;  do
@@ -20,7 +24,7 @@ done
 while getopts "d:s:f:u:c:a:" opt; do
     case $opt in
         d) domain="OPTARG" ;;
-        s)
+        s)  ss
 
 
     esac
