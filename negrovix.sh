@@ -99,17 +99,17 @@ function main() {
     fi
 
 
-if [[ $ssl_enabled = 1]]; then
+if [[ $ssl_enabled -eq 1 ]]; then
     http_opts $domain $dfile $rootdir $config_file
-else:
+else
     https_opts $domain $dfile $ssl_key $ssl_cert $rootdir $config_file
 fi
 
-if [[ $u_enabled = 0 ]]; then
+if [[ $u_enabled -eq 0 ]]; then
     user_dir_opts $udir $uroot $config_file
 fi
 
-if [[ $htpasswd_enabled = 0]]; then
+if [[ $htpasswd_enabled -eq 0 ]]; then
 
     auth_opts $htpasswd_file $htpasswd_url_path $htpasswd_user $htpasswd_password $config_file
 fi
@@ -185,7 +185,7 @@ server {
         location / {
                 try_files $uri $uri/ =404;
         }
-EOF    
+EOF  
 }
 
 function user_dir_opts(){
@@ -239,7 +239,7 @@ oh_user=$3
 oh_password=$4
 oh_config_file=$5
 
-if  ! htpasswd -b "$oh_file" "$oh_user" "$oh_password" ;
+if  ! htpasswd -b "$oh_file" "$oh_user" "$oh_password" ; then
     echo "An error happend during htpasswd creation, please check your syntax and run the script agian. -h for help menu"
 fi
 mkdir -p /var/www/"$oh_path"
