@@ -16,6 +16,7 @@ ssl_enabled=1
 udir=""
 uroot=""
 u_enabled=1
+htpasswd_file="/etc/nginx/htpasswd"
 
     
     for index in nginx apache2-utils nginx-extras; do
@@ -89,13 +90,13 @@ u_enabled=1
 
 
 if [[ $ssl_enabled = 1]]; then
-    httpopts $domain $dfile $rootdir $config_file
+    http_opts $domain $dfile $rootdir $config_file
 else:
-    httpsopts $domain $dfile $ssl_key $ssl_cert $rootdir $config_file
+    https_opts $domain $dfile $ssl_key $ssl_cert $rootdir $config_file
 fi
 
 if [[ $u_enabled = 0 ]]; then
-    userdiropts $udir $uroot $config_file
+    user_dir_opts $udir $uroot $config_file
 fi
 
 
@@ -123,7 +124,7 @@ function check_and_install() {
 }
 
 
-function httpsopts(){
+function https_opts(){
 odomain=$1
 ofile=$2
 ossl_key=$3
@@ -157,7 +158,7 @@ server {
 EOF
 }
 
-function httpopts(){
+function http_opts(){
 odomain=$1
 ofile=$2
 oroot_dir=$3
@@ -179,7 +180,7 @@ server {
 EOF    
 }
 
-function userdiropts(){
+function user_dir_opts(){
 ouser_dir=$1
 ouser_root=$2
 oconfig_file=$3
@@ -223,6 +224,7 @@ fi
 
 }
 
+function auth_opts()
 
 
 
