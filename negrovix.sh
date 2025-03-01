@@ -116,6 +116,7 @@ fi
 
 echo "}" >> $config_file
 
+create_link $config_file
 restart_nginx
 
 }
@@ -269,23 +270,33 @@ function check_syntax() {
 }
 
 function restart_nginx() {
-    if check_syntax; then
         read -p "Would you like to restart nginx [y/n]: " user_input
         if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
             sudo service nginx restart
         elif [[ "$user_input" == "n" || "$user_input" == "N" ]]; then
             echo "Restart was not required, exiting script"
-            exit 0
+            return 0
         else
             echo "Invalid input. Please enter y or n."
-            exit 1
+            return 1
         fi
-    else
-        echo "Please check your configuration file for any incorrect syntax before restarting your application. Exiting script."
-        exit 1
-    fi
 }
 
-
+function create_link (){
+oconfig=$1 
+if check_syntax; then
+    read -p "Would you like to create a symlink [y/n]: " user_input
+    if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
+    ln -s "$oconfig" /etc/nginx/sites-enabled/
+    echo "Symlink was created at /etc/nginx/sites-enabled/"
+        elif [[ "$user_input" == "n" || "$user_input" == "N" ]]; then
+         echo "Creating a link was not required exiting script"   
+     else 
+         echo "Invalid input. Please enter y or n."
+    fi
+else
+    echo "Please check your coniguration file for any incorrect syntax link was not established"
+fi
+}
 
 main "$@"
