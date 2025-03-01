@@ -272,7 +272,6 @@ function restart_nginx() {
     if check_syntax; then
         read -p "Would you like to restart nginx [y/n]: " user_input
         if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
-            echo "Restarting nginx daemon"
             sudo service nginx restart
         elif [[ "$user_input" == "n" || "$user_input" == "N" ]]; then
             echo "Restart was not required, exiting script"
