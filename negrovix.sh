@@ -17,6 +17,10 @@ udir=""
 uroot=""
 u_enabled=1
 htpasswd_file="/etc/nginx/htpasswd"
+htpasswd_url_path=""
+htpasswd_user=""
+htpasswd_password=""
+htpasswd_enabled=1
 
     
     for index in nginx apache2-utils nginx-extras; do
@@ -58,11 +62,11 @@ htpasswd_file="/etc/nginx/htpasswd"
                fi
                ;;
            u) 
-             if [[ -z "$OPTARG" != *:*  ]]; then
+             if [[ "$OPTARG" != *:*  ]]; then
                 echo "Syntax Error: -u <user root>:<user dir>"
                exit 1
              fi
-            IFS=":" read -r $uroot $dir <<< "$OPTARG"
+            IFS=":" read -r uroot dir <<< "$OPTARG"
             if [[ -z "$uroot" || -z "$dir" || ! -e "$dir" ]]; then
                 echo "Synatx Error: -u <user root>:<user dir>"
                 echo "Hint: Validate that your user directory exists"
@@ -70,15 +74,24 @@ htpasswd_file="/etc/nginx/htpasswd"
              fi
                 $u_enabled=1
               ;;
+            a)
+               if [[ ! "$OPTARG" =~ ^[^:]+:[^:]+:[^:]+$ ]]; then
+                    echo "Syntax Error: -a <url_path>:<username>:<password>"
+                    exit 1
+                fi
+                    IFS=":" read -r htpasswd_url_path htpasswd_user htpasswd_password <<< "$OPTARG"
+                    if [[ -z $htpasswd_url_path || -z $htpasswd_user || -z $htpasswd_password ]]; then
+                        echo "Syntax Error: -a <url_path>:<username>:<password>"
+                    fi
+                   $htpasswd_enabled=0
+               ;;
+                   
 
 
-                        
 
 
 
-
-
-
+            
         esac
     done
 
@@ -99,6 +112,11 @@ if [[ $u_enabled = 0 ]]; then
     user_dir_opts $udir $uroot $config_file
 fi
 
+if [[ $htpasswd_enabled = 0]]; then
+
+    auth_opts $htpasswd_file $htpasswd_url_path $htpasswd_user $htpasswd_password $config_file
+fi
+
 
 
 
@@ -109,6 +127,8 @@ fi
 
 
 echo "}" >> $config_file
+
+restart_nginx
 
 }
 
@@ -224,7 +244,73 @@ fi
 
 }
 
-function auth_opts()
+function auth_opts(){
+oh_file=$1
+oh_path=$2
+oh_user=$3
+oh_password=$4
+oh_config_file=$5
+
+if  ! htpasswd -b "$oh_file" "$oh_user" "$oh_password" ;
+    echo "An error happend during htpasswd creation, please check your syntax and run the script agian. -h for help menu"
+fi
+mkdir -p /var/www/"$oh_path"
+
+cat << 'EOF' >> $oh_config_file
+location $oh_path{
+    auth_basic "Restricted Area";
+    auth_basic_user_file "$oh_file";
+    root /var/www/"$oh_path";
+    index index.html;
+
+}
+EOF
+}
+
+
+function check_syntax() {
+    if sudo nginx -t 2>&1 | grep -E "syntax is ok|test is successful"; then
+        echo "Syntax and test are golden"
+        return 0
+    else
+        echo "You should check your configuration file for any incorrect inputs"
+        return 1
+    fi
+}
+
+function restart_nginx() {
+    if check_syntax; then
+        read -p "Would you like to restart nginx [y/n]: " user_input
+        if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
+            echo "Restarting nginx daemon"
+            sudo service nginx restart
+        elif [[ "$user_input" == "n" || "$user_input" == "N" ]]; then
+            echo "Restart was not required, exiting script"
+            exit 0
+        else
+            echo "Invalid input. Please enter y or n."
+            exit 1
+        fi
+    else
+        echo "Please check your configuration file for any incorrect syntax before restarting your application. Exiting script."
+        exit 1
+    fi
+}
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
 
 
 
