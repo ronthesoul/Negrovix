@@ -208,6 +208,7 @@ EOF
 
     if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
         mkdir -p /home/$USER/$ouser_dir
+        chmod 755 /home/$USER/$ouser_dir
         echo "Directory /home/$USER/$ouser_dir has been created."
     elif [[ "$user_input" == "n" || "$user_input" == "N" ]]; then
         echo "Directory not created."
