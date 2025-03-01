@@ -7,91 +7,88 @@
 ###########################
 
 function main() {
-domain=""
-confile_file=""
-dfile="index.html"
-ssl_cert=""
-ssl_key=""
-ssl_enabled=1
-udir=""
-uroot=""
-u_enabled=1
-htpasswd_file="/etc/nginx/htpasswd"
-htpasswd_url_path=""
-htpasswd_user=""
-htpasswd_password=""
-htpasswd_enabled=1
+    domain=""
+    config_file=""
+    dfile="index.html"
+    ssl_cert=""
+    ssl_key=""
+    ssl_enabled=1
+    udir=""
+    uroot=""
+    u_enabled=1
+    htpasswd_file="/etc/nginx/htpasswd"
+    htpasswd_url_path=""
+    htpasswd_user=""
+    htpasswd_password=""
+    htpasswd_enabled=1
 
     
     for index in nginx apache2-utils nginx-extras; do
         check_and_install "$index"
     done
 
-    # Parse options
-    while getopts "d:s:f:u:c:a:h" opt; do
+    while getopts "d:s:f:u:a:h" opt; do
         case $opt in
-            d) domain="$OPTARG"
-               if [[ -z "$domain" ]]; then
-                   echo "Syntax Error: -d <domain>"
-                   exit 1
-               fi
-               confile_file="/etc/nginx/sites-available/$domain"
-               rootdir="/var/www/$domain"
-               ;;
-            
-            s) 
-               if [[ "$OPTARG" != *:* ]]; then
-                   echo "Syntax Error: -s <certfile>:<keyfile>"
-                   exit 1
-               fi
+            d)
+                domain="$OPTARG"
+                if [[ -z "$domain" ]]; then
+                    echo "Syntax Error: -d <domain>"
+                    exit 1
+                fi
+                config_file="/etc/nginx/sites-available/$domain"
+                rootdir="/var/www/$domain"
+                ;;
+            s)
+                if [[ "$OPTARG" != *:* ]]; then
+                    echo "Syntax Error: -s <certfile>:<keyfile>"
+                    exit 1
+                fi
 
-               IFS=":" read -r ssl_cert ssl_key <<< "$OPTARG"
+                IFS=":" read -r ssl_cert ssl_key <<< "$OPTARG"
 
-               if [[ -z "$ssl_cert" || -z "$ssl_key" ]]; then
-                   echo "Syntax Error: -s <certfile>:<keyfile>"
-                   exit 1
-               fi
+                if [[ -z "$ssl_cert" || -z "$ssl_key" ]]; then
+                    echo "Syntax Error: -s <certfile>:<keyfile>"
+                    exit 1
+                fi
 
-               ssl_enabled=0 
-               ;;
-            
-            f) dfile="$OPTARG"
-               if [[ -z "$dfile" ]]; then
-                   echo "Syntax Error: -f <main html file>"
-                   exit 1
-               fi
-               ;;
-           u) 
-             if [[ "$OPTARG" != *:*  ]]; then
-                echo "Syntax Error: -u <user root>:<user dir>"
-               exit 1
-             fi
-            IFS=":" read -r uroot dir <<< "$OPTARG"
-            if [[ -z "$uroot" || -z "$dir" || ! -e "$dir" ]]; then
-                echo "Synatx Error: -u <user root>:<user dir>"
-                echo "Hint: Validate that your user directory exists"
-                exit 1
-             fi
-                $u_enabled=1
-              ;;
+                ssl_enabled=0
+                ;;
+            f)
+                dfile="$OPTARG"
+                if [[ -z "$dfile" ]]; then
+                    echo "Syntax Error: -f <main html file>"
+                    exit 1
+                fi
+                ;;
+            u)
+                if [[ "$OPTARG" != *:* ]]; then
+                    echo "Syntax Error: -u <user root>:<user dir>"
+                    exit 1
+                fi
+                IFS=":" read -r uroot udir <<< "$OPTARG"
+                if [[ -z "$uroot" || -z "$udir" || ! -e "$udir" ]]; then
+                    echo "Syntax Error: -u <user root>:<user dir>"
+                    echo "Hint: Validate that your user directory exists"
+                    exit 1
+                fi
+                u_enabled=0
+                ;;
             a)
-               if [[ ! "$OPTARG" =~ ^[^:]+:[^:]+:[^:]+$ ]]; then
+                if [[ ! "$OPTARG" =~ ^[^:]+:[^:]+:[^:]+$ ]]; then
                     echo "Syntax Error: -a <url_path>:<username>:<password>"
                     exit 1
                 fi
-                    IFS=":" read -r htpasswd_url_path htpasswd_user htpasswd_password <<< "$OPTARG"
-                    if [[ -z $htpasswd_url_path || -z $htpasswd_user || -z $htpasswd_password ]]; then
-                        echo "Syntax Error: -a <url_path>:<username>:<password>"
-                    fi
-                   $htpasswd_enabled=0
-               ;;
-                   
-
-
-
-
-
-            
+                IFS=":" read -r htpasswd_url_path htpasswd_user htpasswd_password <<< "$OPTARG"
+                if [[ -z $htpasswd_url_path || -z $htpasswd_user || -z $htpasswd_password ]]; then
+                    echo "Syntax Error: -a <url_path>:<username>:<password>"
+                    exit 1
+                fi
+                htpasswd_enabled=0
+                ;;
+            h | *)
+                echo "Usage: $0 -d <domain> [-s <certfile>:<keyfile>] [-f <main html file>] [-u <user root>:<user dir>] [-a <url_path>:<username>:<password>]"
+                exit 1
+                ;;
         esac
     done
 
@@ -116,15 +113,6 @@ if [[ $htpasswd_enabled = 0]]; then
 
     auth_opts $htpasswd_file $htpasswd_url_path $htpasswd_user $htpasswd_password $config_file
 fi
-
-
-
-
-
-
-
-
-
 
 echo "}" >> $config_file
 
