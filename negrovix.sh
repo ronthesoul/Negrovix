@@ -185,8 +185,9 @@ server {
         location / {
                 try_files $uri $uri/ =404;
         }
-EOF  
+EOF
 }
+
 
 function user_dir_opts(){
 ouser_dir=$1
@@ -284,24 +285,6 @@ function restart_nginx() {
         exit 1
     fi
 }
-
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
