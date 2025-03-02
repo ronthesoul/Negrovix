@@ -111,6 +111,9 @@ EOF
         exit 1
     fi
 
+    if [[ -e "$config_file" ]]; then
+        echo "Error: config file already exists in /etc/nginx/site-available"
+    fi
 
 if [[ $ssl_enabled -eq 1 ]]; then
     http_opts $domain $dfile $rootdir $config_file
