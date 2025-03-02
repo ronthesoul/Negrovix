@@ -14,7 +14,6 @@ function main() {
     ssl_key=""
     ssl_enabled=1
     udir=""
-    uroot=""
     uuser=""
     u_enabled=1
     htpasswd_file="/etc/nginx/.htpasswd"
@@ -62,13 +61,13 @@ function main() {
                 fi
                 ;;
             u)
-                if [[ ! "$OPTARG" =~ ^[^:]+:[^:]+:[^:]+$ ]]; then
-                    echo "Syntax Error: -u <user root>:<user name>:<user folder>"
+                if [[ ! "$OPTARG" =~ ^[^:]+:[^:]+$ ]]; then
+                    echo "Syntax Error: -u <user name>:<user dir>"
                     exit 1
                 fi
-                IFS=":" read -r uroot uuser udir <<< "$OPTARG"
-                if [[ -z "$uroot" || -z "$udir" || -z "$uuser" ]]; then
-                    echo "Syntax Error: -u <user root>:<user dir>"
+                IFS=":" read -r  uuser udir <<< "$OPTARG"
+                if [[ -z "$udir" || -z "$uuser" ]]; then
+                    echo "Syntax Error: -u <user name>:<user dir>"
                     exit 1
                 elif [[ ! $(getent passwd $uuser) ]]; then
                     echo "The user $uuser does not exist"
@@ -109,7 +108,7 @@ else
 fi
 
 if [[ $u_enabled -eq 0 ]]; then
-    user_dir_opts $udir $uuser $uroot $config_file
+    user_dir_opts $udir $uuser $config_file
 fi
 
 if [[ $htpasswd_enabled -eq 0 ]]; then
@@ -196,25 +195,25 @@ EOF
 function user_dir_opts(){
 ouser_dir=$1
 ouser_user=$2
-ouser_root=$3
-oconfig_file=$4
+oconfig_file=$3
+opath=/home/$ouser_user/$ouser_dir
 
 cat << EOF >> $oconfig_file
 
-    location $ouser_root ^/~(.+?)(/.*)?$ {
+    location \~ ^/~(.+?)(/.*)?$ {
     alias /home/\$1/$ouser_dir\$2;
 }
 EOF
 
-    if [[ ! -e /home/$ouser_user/$ouser_dir ]]; then
-    echo "Seems like /home/$ouser_user/$ouser_dir does not exist, would you like to create this directory? [y/n]"
+    if [[ ! -e $opath ]]; then
+    echo "Seems like $opath does not exist, would you like to create this directory? [y/n]"
     
     read -r user_input  
 
     if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
-        mkdir -p /home/$ouser_user/$ouser_dir
-        chmod 755 /home/$ouser_user/$ouser_dir
-        echo "Directory /home/$ouser_user/$ouser_dir has been created."
+        mkdir -p $opath
+        chmod 755 $opath
+        echo "Directory $opath has been created."
     elif [[ "$user_input" == "n" || "$user_input" == "N" ]]; then
         echo "Directory not created."
     else
