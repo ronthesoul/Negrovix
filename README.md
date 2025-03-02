@@ -23,7 +23,7 @@ Run the script with the required options:
 | `-d <domain>` | Specifies the domain name (Required). |
 | `-s <certfile>:<keyfile>` | Enables SSL and sets the certificate and key file. |
 | `-f <html file>` | Defines the main HTML file. |
-| `-u <user root>:<user dir>` | Sets up user directory configuration. |
+| `-u <username>:<user dir>` | Sets up user directory configuration. |
 | `-a <auth path>:<username>:<password>` | Enables HTTP basic authentication. |
 | `-h` | Displays help information. |
 
@@ -41,9 +41,9 @@ curl -sSLo negrovix.sh https://raw.githubusercontent.com/ronthesoul/negrovix/ref
 ```
 
 ### Example Usage
-Create an Nginx configuration for `example.com`:
+Create an Nginx configuration for `example.com` and also create a userdir:
 ```bash
-sudo ./negrovix.sh -d example.com -f index.html
+sudo ./negrovix.sh -d example.com -u username:public_html
 ```
 
 Enable SSL with a certificate and key:
@@ -53,7 +53,7 @@ sudo ./negrovix.sh -d example.com -s /etc/ssl/cert.pem:/etc/ssl/key.pem
 
 Enable basic authentication:
 ```bash
-sudo ./negrovix.sh -d example.com -a /secure:path:user:password
+sudo ./negrovix.sh -d example.com -a /admin:user:password
 ```
 
 ## 🔧 Prerequisites
