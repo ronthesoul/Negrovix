@@ -88,7 +88,7 @@ function main() {
                 htpasswd_enabled=0
                 ;;
             h | *)
-                echo "Usage: $0 -d <domain> [-s <certfile>:<keyfile>] [-f <main html file>] [-u <user root>:<user dir>] [-a <url_path>:<username>:<password>]"
+                echo "Usage: $0 -d <domain> [-s <certfile>:<keyfile>] [-f <main html file>] [-u <username>:<user dir>] [-a <url_path>:<username>:<password>]"
                 exit 1
                 ;;
         esac
@@ -200,7 +200,7 @@ opath=/home/$ouser_user/$ouser_dir
 
 cat << EOF >> $oconfig_file
 
-    location \~ ^/~(.+?)(/.*)?$ {
+    location ~ ^/~(.+?)(/.*)?$ {
     alias /home/\$1/$ouser_dir\$2;
 }
 EOF
