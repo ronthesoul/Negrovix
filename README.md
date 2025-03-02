@@ -14,7 +14,7 @@ Negrovix is a Bash script designed to automate the creation of **Nginx configura
 ### 🚀 Usage
 Run the script with the required options:
 ```bash
-./negrovix.sh -d <domain> [-s <certfile>:<keyfile>] [-f <html file>] [-u <user root>:<user dir>] [-a <auth path>:<username>:<password>]
+./negrovix.sh -d <domain> [-s <certfile>:<keyfile>] [-f <html file>] [-u <username>:<user dir>] [-a <auth path>:<username>:<password>]
 ```
 
 ### 🛠️ Options:
