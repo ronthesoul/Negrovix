@@ -202,8 +202,8 @@ cat << EOF >> $oconfig_file
 }
 EOF
 
-    if [[ ! -e /home/$USER/$ouser_dir ]]; then
-    echo "Seems like /home/$USER/$ouser_dir does not exist, would you like to create this directory? [y/n]"
+    if [[ ! -e $ouser_dir ]]; then
+    echo "Seems like $ouser_dir does not exist, would you like to create this directory? [y/n]"
     
     read -r user_input  
 
