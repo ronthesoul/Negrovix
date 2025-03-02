@@ -22,6 +22,17 @@ function main() {
     htpasswd_password=""
     htpasswd_enabled=1
 
+cat << 'EOF'
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    __                          _
+  /\ \ \___  __ _ _ __ _____   _(_)_  __
+ /  \/ / _ \/ _` | '__/ _ \ \ / / \ \/ /
+/ /\  /  __/ (_| | | | (_) \ V /| |>  <
+\_\ \/ \___|\__, |_|  \___/ \_/ |_/_/\_\
+            |___/
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+EOF
+
     
     for index in nginx apache2-utils nginx-extras; do
         check_and_install "$index"
