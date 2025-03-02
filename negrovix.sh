@@ -15,6 +15,7 @@ function main() {
     ssl_enabled=1
     udir=""
     uroot=""
+    uuser=""
     u_enabled=1
     htpasswd_file="/etc/nginx/.htpasswd"
     htpasswd_url_path=""
@@ -61,14 +62,16 @@ function main() {
                 fi
                 ;;
             u)
-                if [[ "$OPTARG" != *:* ]]; then
-                    echo "Syntax Error: -u <user root>:<user dir>"
+                if [[ ! "$OPTARG" =~ ^[^:]+:[^:]+:[^:]+$ ]]; then
+                    echo "Syntax Error: -u <user root>:<user name>:<user folder>"
                     exit 1
                 fi
-                IFS=":" read -r uroot udir <<< "$OPTARG"
-                if [[ -z "$uroot" || -z "$udir" || ! -e "$udir" ]]; then
+                IFS=":" read -r uroot uuser udir <<< "$OPTARG"
+                if [[ -z "$uroot" || -z "$udir" || -z "$uuser" ]]; then
                     echo "Syntax Error: -u <user root>:<user dir>"
-                    echo "Hint: Validate that your user directory exists"
+                    exit 1
+                elif [[ ! $(getent passwd $uuser) ]]; then
+                    echo "The user $uuser does not exist"
                     exit 1
                 fi
                 u_enabled=0
@@ -106,7 +109,7 @@ else
 fi
 
 if [[ $u_enabled -eq 0 ]]; then
-    user_dir_opts $udir $uroot $config_file
+    user_dir_opts $udir $uuser $uroot $config_file
 fi
 
 if [[ $htpasswd_enabled -eq 0 ]]; then
@@ -192,8 +195,9 @@ EOF
 
 function user_dir_opts(){
 ouser_dir=$1
-ouser_root=$2
-oconfig_file=$3
+ouser_user=$2
+ouser_root=$3
+oconfig_file=$4
 
 cat << EOF >> $oconfig_file
 
@@ -202,15 +206,15 @@ cat << EOF >> $oconfig_file
 }
 EOF
 
-    if [[ ! -e $ouser_dir ]]; then
-    echo "Seems like $ouser_dir does not exist, would you like to create this directory? [y/n]"
+    if [[ ! -e /home/$ouser_user/$ouser_dir ]]; then
+    echo "Seems like /home/$ouser_user/$ouser_dir does not exist, would you like to create this directory? [y/n]"
     
     read -r user_input  
 
     if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
-        mkdir -p /home/$USER/$ouser_dir
-        chmod 755 /home/$USER/$ouser_dir
-        echo "Directory /home/$USER/$ouser_dir has been created."
+        mkdir -p /home/$ouser_user/$ouser_dir
+        chmod 755 /home/$ouser_user/$ouser_dir
+        echo "Directory /home/$ouser_user/$ouser_dir has been created."
     elif [[ "$user_input" == "n" || "$user_input" == "N" ]]; then
         echo "Directory not created."
     else
