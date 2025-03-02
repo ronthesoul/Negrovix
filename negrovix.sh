@@ -3,7 +3,7 @@
 # Written by: Ron Negron
 # Date: 28.02
 # Purpose: A tool to create an Nginx config file
-# Version: 0.0.3
+# Version: 0.0.5
 ###########################
 
 function main() {
@@ -16,7 +16,7 @@ function main() {
     udir=""
     uroot=""
     u_enabled=1
-    htpasswd_file="/etc/nginx/htpasswd"
+    htpasswd_file="/etc/nginx/.htpasswd"
     htpasswd_url_path=""
     htpasswd_user=""
     htpasswd_password=""
@@ -145,7 +145,7 @@ cat << EOF > $oconfig_file
 server {
     listen 80;
     server_name $odomain;
-    return 301 https://$host$request_uri;
+    return 301 https://\$host\$request_uri;
 }
 server {
     listen 443 ssl;
@@ -162,7 +162,7 @@ server {
     ssl_session_timeout 10m;
 
     location / {
-        try_files $uri $uri/ =404;
+        try_files \$uri \$uri/ =404;
     }
 EOF
 }
@@ -184,7 +184,7 @@ server {
         index $ofile;
 
         location / {
-                try_files $uri $uri/ =404;
+                try_files \$uri \$uri/ =404;
         }
 EOF
 }
@@ -242,7 +242,7 @@ oh_user=$3
 oh_password=$4
 oh_config_file=$5
 
-if  ! htpasswd -b "$oh_file" "$oh_user" "$oh_password" ; then
+if  ! htpasswd -b -c "$oh_file" "$oh_user" "$oh_password" ; then
     echo "An error happend during htpasswd creation, please check your syntax and run the script agian. -h for help menu"
 fi
 mkdir -p /var/www/"$oh_path"
