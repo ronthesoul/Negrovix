@@ -21,6 +21,8 @@ function main() {
     htpasswd_user=""
     htpasswd_password=""
     htpasswd_enabled=1
+    cgi_file=""
+    cgi_enabled=1
 
 cat << 'EOF'
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -34,11 +36,11 @@ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 EOF
 
     
-    for index in nginx apache2-utils nginx-extras; do
+    for index in nginx apache2-utils nginx-extras python3 fcgiwrap spawn-fcgi; do
         check_and_install "$index"
     done
 
-    while getopts "d:s:f:u:a:h" opt; do
+    while getopts "d:s:f:u:a:c:h" opt; do
         case $opt in
             d)
                 domain="$OPTARG"
@@ -98,8 +100,19 @@ EOF
                 fi
                 htpasswd_enabled=0
                 ;;
+
+            c)
+                cgi_file=$OPTARG
+                if [[ -z $cgi_file ]]; then
+                    echo "Syntax Error: -c <main cgi file>"
+                    exit 1
+                    fi
+                 cgi_enabled=0
+                 ;;
+
             h | *)
                 echo "Usage: $0 -d <domain> [-s <certfile>:<keyfile>] [-f <main html file>] [-u <username>:<user dir>] [-a <url_path>:<username>:<password>]"
+                echo "[-c <main cgi file>]"
                 exit 1
                 ;;
         esac
@@ -129,6 +142,10 @@ fi
 if [[ $htpasswd_enabled -eq 0 ]]; then
 
     auth_opts $htpasswd_file $htpasswd_url_path $htpasswd_user $htpasswd_password $config_file
+fi
+
+if [[ $cgi_enabled -eq 0 ]]; then
+    cgi_opts $cgi_file $rootdir $config_file
 fi
 
 echo "}" >> $config_file
@@ -276,6 +293,52 @@ location $oh_path{
 }
 EOF
 }
+
+function cgi_opts(){
+    local cgi_file="$1"
+    local rootdir="$2"
+    local config_file="$3"
+
+    local full_path="$rootdir/cgi-bin/"
+    local full_fpath="$full_path/$cgi_file"
+
+    if [[ ! -e $full_path ]]; then
+        echo "Creating cgi-bin folder under $full_path and also creating a test CGI file under: $full_fpath..."
+        mkdir -p "$full_path"
+        cat << 'EOF' >> "$full_fpath"
+#!/usr/bin/env python3
+import sys
+print("Content-Type: text/html\n")
+print("<html><body>")
+print("<h1>FastCGI is working!</h1>")
+print("<p>If you see this message, FastCGI is properly configured.</p>")
+print("</body></html>")
+EOF
+        sudo chown www-data:www-data "$full_fpath" "$full_path"
+        sudo chmod 755 "$full_fpath" "$full_path"
+    fi
+
+    echo "Checking and starting fcgiwrap process..."
+    pgrep -x fcgiwrap > /dev/null || sudo spawn-fcgi -s /run/fcgiwrap.socket -M 777 -- /usr/sbin/fcgiwrap &
+
+    cat << EOF >> "$config_file"
+location /cgi-bin/ {
+    fastcgi_pass unix:/run/fcgiwrap.socket;
+    include fastcgi_params;
+    
+    fastcgi_param SCRIPT_FILENAME "$full_fpath";
+    fastcgi_param PATH_INFO \$fastcgi_script_name;
+    fastcgi_param QUERY_STRING \$query_string;
+    fastcgi_param REQUEST_METHOD \$request_method;
+    fastcgi_param CONTENT_TYPE \$content_type;
+    fastcgi_param CONTENT_LENGTH \$content_length;
+    autoindex on;
+    index $cgi_file;
+}
+EOF
+}
+
+
 
 
 function check_syntax() {
