@@ -133,6 +133,7 @@ fi
 echo "}" >> $config_file
 
 create_link $config_file
+add_domain_to_hosts $domain
 restart_nginx
 
 }
@@ -315,5 +316,72 @@ else
     echo "Please check your coniguration file for any incorrect syntax link was not established"
 fi
 }
+
+
+
+
+
+
+
+function validate_ip (){
+local ip=$1
+local regex='^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})$'
+
+if [[ $ip =~ $regex ]]; then
+        oct1=${BASH_REMATCH[1]}
+        oct2=${BASH_REMATCH[2]}
+        oct3=${BASH_REMATCH[3]}
+        oct4=${BASH_REMATCH[4]}
+        if (( oct1 >= 0 && oct1 <= 255 )) && \
+            (( oct2 >= 0 && oct2 <= 255 )) && \
+             (( oct3 >= 0 && oct3 <= 255 )) && \
+             (( oct4 >= 0 && oct4 <= 255 ))
+                 then
+                    return 0
+                else
+                    echo "Invalid IP Address"
+                    return 1
+        fi
+    else
+        echo "Invalid IP Address"
+        return 1
+fi
+
+if grep -q "$ip" /etc/hosts; then
+    echo "The IP address: $ip already exists in /etc/hosts"
+    return 1
+fi
+
+}
+
+function add_domain_to_hosts (){
+local domain=$1
+local ip=""
+
+    read -p "Do you want to add a domain to /etc/hosts (loopback address)? [y/n]: " user_input
+        if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
+               if grep -q "$domain" /etc/hosts; then
+                   echo "The domain is already present in /etc/hosts."
+                    return 1
+                else
+                    read -p "Enter the loopback address (example 127.0.0.1): " loopback_address
+                        if validate_ip $loopback_address; then
+                            echo "$loopback_address $domain" | sudo tee -a /etc/hosts > /dev/null
+                            echo "Domain '$domain' added to /etc/hosts with the address $loopback_address."
+                        else 
+                            echo "There was an error in adding the record $loopback_address $domain to /etc/hosts"
+                            return 1
+                        fi
+               fi
+        fi
+
+}
+
+
+
+
+
+
+
 
 main "$@"
