@@ -112,7 +112,7 @@ EOF
 
             h | *)
                 echo "Usage: $0 -d <domain> [-s <certfile>:<keyfile>] [-f <main html file>] [-u <username>:<user dir>] [-a <url_path>:<username>:<password>]"
-                echo "[-c <main cgi file>]"
+                echo "                      [-c <main cgi file>]"
                 exit 1
                 ;;
         esac
