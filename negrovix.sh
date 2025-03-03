@@ -113,6 +113,7 @@ EOF
 
     if [[ -e "$config_file" ]]; then
         echo "Error: config file already exists in /etc/nginx/site-available"
+        exit 1
     fi
 
 if [[ $ssl_enabled -eq 1 ]]; then
