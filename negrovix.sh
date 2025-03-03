@@ -300,7 +300,7 @@ function cgi_opts(){
     local config_file="$3"
 
     local full_path="$rootdir/cgi-bin/"
-    local full_fpath="$full_path/$cgi_file"
+    local full_fpath="$full_path$cgi_file"
 
     if [[ ! -e $full_path ]]; then
         echo "Creating cgi-bin folder under $full_path and also creating a test CGI file under: $full_fpath..."
@@ -326,7 +326,7 @@ location /cgi-bin/ {
     fastcgi_pass unix:/run/fcgiwrap.socket;
     include fastcgi_params;
     
-    fastcgi_param SCRIPT_FILENAME "$full_fpath";
+    fastcgi_param SCRIPT_FILENAME $full_fpath;
     fastcgi_param PATH_INFO \$fastcgi_script_name;
     fastcgi_param QUERY_STRING \$query_string;
     fastcgi_param REQUEST_METHOD \$request_method;
