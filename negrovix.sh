@@ -277,17 +277,18 @@ oh_path=$2
 oh_user=$3
 oh_password=$4
 oh_config_file=$5
+oh_root_path=$6
 
 if  ! htpasswd -b -c "$oh_file" "$oh_user" "$oh_password" ; then
     echo "An error happend during htpasswd creation, please check your syntax and run the script agian. -h for help menu"
 fi
-mkdir -p /var/www/"$oh_path"
+mkdir -p $oh_root_path/$oh_path
 
 cat << EOF >> $oh_config_file
 location $oh_path{
     auth_basic "Restricted Area";
     auth_basic_user_file "$oh_file";
-    root /var/www/"$oh_path";
+    root $oh_root_path/$oh_path;
     index index.html;
 
 }
