@@ -200,6 +200,8 @@ server {
         try_files \$uri \$uri/ =404;
     }
 EOF
+
+check_and_download_ssl $ossl_cert $ossl_key
 }
 
 function http_opts(){
@@ -441,6 +443,33 @@ local ip=""
         fi
 
 }
+
+function check_and_download_ssl(){
+local cert_file=$1
+local key_file=$2
+
+if [[ ! -e $cert_file || ! -e $key_file ]]; then 
+    read -p "Looks like the cert and key file don't exist, would you like to to create them? [y/n] " user_input
+    if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
+       if  openssl req -x509 -newkey rsa:4096 -keyout "$key_file" -out "$cert_file" -days 365 -nodes; then
+           echo "SSL key and cery were created at keyfile: "$key_file" certfile: "$cert_file"
+            return 0
+       else
+           echo "There was an error in crearing the key and cert files"
+           return 1
+       fi
+       return 0
+   elif [[ "$user_input" == "n" || "$user_input" == "N" ]]; then
+       return 1
+    else 
+        echo "Invalid input [y/n]"
+        return 1
+    fi
+
+       echo "The cert and key file already exist"
+    fi
+}
+
 
 
 
