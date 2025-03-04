@@ -8,7 +8,10 @@ Negrovix is a Bash script designed to automate the creation of **Nginx configura
 - Supports SSL certificate configuration.
 - Enables HTTP basic authentication.
 - Configures user directories.
+- Can configure cgi scripting.
+- Automaticly adds /etc/hosts entry if wanted
 - Performs syntax checks and restarts Nginx safely.
+- etc...
 
 
 ### 🚀 Usage
@@ -25,6 +28,7 @@ Run the script with the required options:
 | `-f <html file>` | Defines the main HTML file. |
 | `-u <username>:<user dir>` | Sets up user directory configuration. |
 | `-a <auth path>:<username>:<password>` | Enables HTTP basic authentication. |
+| `-c <cgi file name>` | Enables cgi-bin scripting, using fcgi |
 | `-h` | Displays help information. |
 
 ### 📥 Installation
@@ -60,6 +64,11 @@ sudo ./negrovix.sh -d example.com -a /admin:user:password
 -  **Operating System**: Debian-based Linux distributions (Ubuntu, Debian, etc.)
 -  **Shell**: Bash (must be installed)
 
+## Contributors 
+The project was done by myself [Contributors](https://github.com/ronthesoul/Negrovix/blob/main/CONTRIBUTORS.md).
+
+## Task
+The task we were given is to make a tool to automaticly genereate nginx config file - [Task](https://github.com/ronthesoul/Negrovix/blob/main/TASKS.md).
 
 ## 👤 Author
 Created by [ronthesoul](https://github.com/ronthesoul).
