@@ -8,10 +8,9 @@ Negrovix is a Bash script designed to automate the creation of **Nginx configura
 - Supports SSL certificate configuration.
 - Enables HTTP basic authentication.
 - Configures user directories.
-- Can configure cgi scripting.
+- Can configure CGI scripting.
 - Automaticly adds /etc/hosts entry if wanted
 - Performs syntax checks and restarts Nginx safely.
-- etc...
 
 
 ### 🚀 Usage
