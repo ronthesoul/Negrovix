@@ -442,10 +442,12 @@ local ip=""
 function check_and_download_ssl(){
 local cert_file=$1
 local key_file=$2
+local ssl_dir=$(dirname "$key_file")
 
 if [[ ! -e $cert_file || ! -e $key_file ]]; then 
     read -p "Looks like the cert and key file don't exist, would you like to to create them? [y/n] " user_input
     if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
+        mkdir -p "$ssl_dir"
        if  openssl req -x509 -newkey rsa:4096 -keyout "$key_file" -out "$cert_file" -days 365 -nodes; then
            echo "SSL key and cery were created at keyfile: "$key_file" certfile: "$cert_file""
             return 0
