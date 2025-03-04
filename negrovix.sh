@@ -447,7 +447,7 @@ if [[ ! -e $cert_file || ! -e $key_file ]]; then
     read -p "Looks like the cert and key file don't exist, would you like to to create them? [y/n] " user_input
     if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
        if  openssl req -x509 -newkey rsa:4096 -keyout "$key_file" -out "$cert_file" -days 365 -nodes; then
-           echo "SSL key and cery were created at keyfile: "$key_file" certfile: "$cert_file"
+           echo "SSL key and cery were created at keyfile: "$key_file" certfile: "$cert_file""
             return 0
        else
            echo "There was an error in crearing the key and cert files"
