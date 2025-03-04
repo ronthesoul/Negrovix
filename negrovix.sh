@@ -7,22 +7,22 @@
 ###########################
 
 function main() {
-    domain=""
-    config_file=""
-    dfile="index.html"
-    ssl_cert=""
-    ssl_key=""
-    ssl_enabled=1
-    udir=""
-    uuser=""
-    u_enabled=1
-    htpasswd_file="/etc/nginx/.htpasswd"
-    htpasswd_url_path=""
-    htpasswd_user=""
-    htpasswd_password=""
-    htpasswd_enabled=1
-    cgi_file=""
-    cgi_enabled=1
+    domain="" #domain name variable example ron.com
+    config_file="" #This variable will hold the path to /etc/nginx/sites-avaiable/configs file
+    dfile="index.html" #default file is index.html use can change
+    ssl_cert="" #ssl crt path start empty get from args
+    ssl_key="" # same as  crt just the key
+    ssl_enabled=1 # Determines if https is enabled or not Default is http
+    udir="" # User dir folder "Without path" for example ~/public_html
+    uuser="" #The user home directory where the folder should be
+    u_enabled=1 #Determines if ther dir feature is enabled or not 
+    htpasswd_file="/etc/nginx/.htpasswd" #Path to .htpasswd file
+    htpasswd_url_path="" #A path that will be present in the URL path for example /admin 
+    htpasswd_user="" # user to create .htpasswd file
+    htpasswd_password="" #password for .htpasswd file 
+    htpasswd_enabled=1 # Determines if auth is enabled
+    cgi_file="" # Hold cgi file name
+    cgi_enabled=1 # Determines if cgi is enabled
 
 cat << 'EOF'
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -35,7 +35,7 @@ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 EOF
 
-    
+    # Downloads missing dependecies 
     for index in nginx apache2-utils nginx-extras python3 fcgiwrap spawn-fcgi; do
         check_and_install "$index"
     done
@@ -49,7 +49,7 @@ EOF
                     exit 1
                 fi
                 config_file="/etc/nginx/sites-available/$domain"
-                rootdir="/var/www/$domain"
+                rootdir="/var/www/$domain" #Defines the full url path where the server would hold hte stuff and it would act as a root 
                 ;;
             s)
                 if [[ "$OPTARG" != *:* ]]; then
@@ -118,23 +118,23 @@ EOF
         esac
     done
 
-    
+    # -d is the only required parameter 
     if [[ -z "$domain" ]]; then
         echo "Error: -d (domain) is required"
         exit 1
     fi
-
+#If there is already present config file with the same name, it will fail
     if [[ -e "$config_file" ]]; then
         echo "Error: config file already exists in /etc/nginx/site-available"
         exit 1
     fi
-
+#checks if ssl is enabled/disabled and via that it would determine if to run http option or https option
 if [[ $ssl_enabled -eq 1 ]]; then
     http_opts $domain $dfile $rootdir $config_file
 else
     https_opts $domain $dfile $ssl_key $ssl_cert $rootdir $config_file
 fi
-
+#this section checks if the user enabled the mentioned features like auth cgi or user dir
 if [[ $u_enabled -eq 0 ]]; then
     user_dir_opts $udir $uuser $config_file
 fi
@@ -147,16 +147,16 @@ fi
 if [[ $cgi_enabled -eq 0 ]]; then
     cgi_opts $cgi_file $rootdir $config_file
 fi
-
+#Finishes the } syntax, it is made to maintain the nginx conf structure, the https and http function miss one } to include all the other options.
 echo "}" >> $config_file
 
-create_link $config_file
+create_link $config_file 
 add_domain_to_hosts $domain
 restart_nginx
 
 }
 
-
+# A function to check and install dependencies. 
 function check_and_install() {
     package=$1
     if ! dpkg -l | grep -q "^ii  $package "; then
@@ -167,7 +167,7 @@ function check_and_install() {
     fi
 }
 
-
+#https option will include ssl and also will redict any 80 traffic to 443
 function https_opts(){
 odomain=$1
 ofile=$2
@@ -203,7 +203,7 @@ EOF
 
 check_and_download_ssl $ossl_cert $ossl_key
 }
-
+#regular and default option <Without ssl>
 function http_opts(){
 odomain=$1
 ofile=$2
@@ -226,7 +226,7 @@ server {
 EOF
 }
 
-
+#Sets up user dir option
 function user_dir_opts(){
 ouser_dir=$1
 ouser_user=$2
@@ -272,7 +272,7 @@ if [[ ! -e /etc/skel/$ouser_dir ]]; then
 fi
 
 }
-
+#Sets up auth option and creates an .htpasswd file
 function auth_opts(){
 oh_file=$1
 oh_path=$2
@@ -296,7 +296,7 @@ location $oh_path{
 }
 EOF
 }
-
+#sets up cgi option, it also spawns fcgi process, and if there is no file that is present it would direct generic python code for testing. 
 function cgi_opts(){
     local cgi_file="$1"
     local rootdir="$2"
@@ -343,7 +343,7 @@ EOF
 
 
 
-
+#A function to check nginx syntax before restart
 function check_syntax() {
     if sudo nginx -t 2>&1 | grep -E "syntax is ok|test is successful"; then
         echo "Syntax and test are golden"
@@ -353,7 +353,7 @@ function check_syntax() {
         return 1
     fi
 }
-
+#restart nginx if user wants to 
 function restart_nginx() {
         read -p "Would you like to restart nginx [y/n]: " user_input
         if [[ "$user_input" == "y" || "$user_input" == "Y" ]]; then
@@ -366,7 +366,7 @@ function restart_nginx() {
             return 1
         fi
 }
-
+#Creates a symlink to sites enabled, will only work if syntax pass
 function create_link (){
 oconfig=$1 
 if check_syntax; then
@@ -384,12 +384,7 @@ else
 fi
 }
 
-
-
-
-
-
-
+#A function that validates that an IP is valid used in function below
 function validate_ip (){
 local ip=$1
 local regex='^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})$'
@@ -420,7 +415,7 @@ if grep -q "$ip" /etc/hosts; then
 fi
 
 }
-
+# A function that adds an /etc/hosts entry checks if the ip is valid one function above
 function add_domain_to_hosts (){
 local domain=$1
 local ip=""
@@ -443,7 +438,7 @@ local ip=""
         fi
 
 }
-
+#if crt and key files are missing it will create them if the user want it.
 function check_and_download_ssl(){
 local cert_file=$1
 local key_file=$2
@@ -469,13 +464,5 @@ if [[ ! -e $cert_file || ! -e $key_file ]]; then
        echo "The cert and key file already exist"
     fi
 }
-
-
-
-
-
-
-
-
 
 main "$@"
