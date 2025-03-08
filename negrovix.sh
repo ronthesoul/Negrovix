@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 ###########################
-# Written by: Ron Negron
+# Written by: Ron Negrov
 # Date: 28.02
 # Purpose: A tool to create an Nginx config file
-# Version: 0.0.5
+# Version: 0.0.12
 ###########################
 
 function main() {
